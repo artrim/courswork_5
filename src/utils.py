@@ -31,3 +31,41 @@ def get_hh_data(employers: list):
     })
 
     return data
+
+
+def create_database(database_name: str, params: dict):
+    """Создание базы данных и таблиц для сохранения данных о вакансиях и компаниях."""
+
+    conn = psycopg2.connect(dbname='postgres', **params)
+    conn.autocommit = True
+    cur = conn.cursor()
+
+    cur.execute(f'DROP DATABASE IF EXISTS {database_name}')
+    cur.execute(f'CREATE DATABASE {database_name}')
+
+    cur.close()
+    conn.close()
+
+    conn = psycopg2.connect(dbname=database_name, **params)
+    with conn.cursor() as cur:
+        cur.execute("""
+                CREATE TABLE employers (
+                    employer_id INTEGER PRIMARY KEY,
+                    employer_name VARCHAR(255)
+                )
+            """)
+
+    with conn.cursor() as cur:
+        cur.execute("""
+                CREATE TABLE vacancies (
+                    vacancy_id SERIAL PRIMARY KEY,
+                    employer_id INTEGER REFERENCES employers(employer_id),
+                    vacancy_name VARCHAR NOT NULL,
+                    city VARCHAR(50),
+                    salary INTEGER,
+                    url TEXT
+                )
+            """)
+
+    conn.commit()
+    conn.close()
