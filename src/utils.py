@@ -72,7 +72,7 @@ def create_database(database_name: str, params: dict):
 
 
 def save_data_to_database(data, database_name, params):
-    """Сохранение данных о каналах и видео в базу данных. """
+    """Сохранение данных о компаниях и вакансиях в базу данных. """
 
     conn = psycopg2.connect(dbname=database_name, **params)
 
