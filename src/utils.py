@@ -69,3 +69,32 @@ def create_database(database_name: str, params: dict):
 
     conn.commit()
     conn.close()
+
+
+def save_data_to_database(data, database_name, params):
+    """Сохранение данных о каналах и видео в базу данных. """
+
+    conn = psycopg2.connect(dbname=database_name, **params)
+
+    with conn.cursor() as cur:
+        for employer in data:
+            employer_data = employer['employers']
+            for i in employer_data:
+                cur.execute(
+                    """
+                    INSERT INTO employers (employer_id, employer_name) VALUES (%s, %s)
+                    """, (i['id'], i['name'])
+                )
+            vacancies_data = employer['vacancies']
+            for vacancy in vacancies_data:
+                cur.execute(
+                    """
+                    INSERT INTO vacancies (employer_id, vacancy_name, city, salary, url)
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    (vacancy['employer']['id'], vacancy['name'], vacancy['area']['name'],
+                     vacancy['salary']['from'], vacancy['alternate_url'])
+                )
+
+    conn.commit()
+    conn.close()
